@@ -18,15 +18,18 @@ def hi():
 
     if request.method == 'POST':
         data = json.loads(request.data)
-        if data.get(u'device') == config.get('geofency', 'device_name'):
-            access_code = config.get('foursquare', 'access_code')
-            client.set_access_token(client.oauth.get_token(access_code))
+        device = data.get(u'device')
+        location = data.get(u'name')
 
-            location = data.get(u'name')
-            if config.get('venues', location):
-                client.checkins.add(params={'venueId': config.get('venues', location)})
+        if config.has_section(device):
+            client.set_access_token(client.oauth.get_token(config.get('foursquare', 'access_code')))
+            if config.has_option(device, location):
+                client.checkins.add(params={'venueId': config.get(device, location)})
                 return "OK"
+
     else:
+        if config.has_option('foursquare', 'access_code'):
+            return "nope"
         return "<a href=\"%s\"><h1>DO THE OAUTH</h1></a>" % client.oauth.auth_url()
 
 
