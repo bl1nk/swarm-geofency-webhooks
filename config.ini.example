@@ -4,4 +4,8 @@ client_secret = YOUR_CLIENT_SECRET
 redirect_uri = YOUR_REDIRECT_URI
 
 [geofency]
-device_name = YOUR_DEVICE_NAME
+device_name = GEOFENCY_DEVICE_ID
+
+[venues]
+VENUE_NAME_IN_GEOFENCY = VENUE_ID
+
