@@ -1,11 +1,10 @@
 from flask import Flask, request
-import json
 import foursquare
-import ConfigParser
+import configparser
 
 app = Flask(__name__)
 
-config = ConfigParser.SafeConfigParser()
+config = configparser.ConfigParser()
 config.read('config.ini')
 
 
@@ -17,9 +16,8 @@ def hi():
     client = foursquare.Foursquare(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
 
     if request.method == 'POST':
-        data = json.loads(request.data)
-        device = data.get(u'device')
-        location = data.get(u'name')
+        device = request.form.get('device')
+        location = request.form.get('name')
 
         if config.has_section(device):
             client.set_access_token(client.oauth.get_token(config.get('foursquare', 'access_code')))
@@ -37,17 +35,16 @@ def hi():
 def oauth_authorize():
     code = request.args.get('code')
     config.set('foursquare', 'access_code', code)
-    with open('config.ini', 'wb') as cfg:
+    with open('config.ini', 'w') as cfg:
         config.write(cfg)
     return "done, set up your webhook now"
 
 
 @app.route("/debug", methods=['POST'])
-def test():
-    data = json.loads(request.data)
-    print data
+def debug():
+    print(request.form)
     return "OK"
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', debug=True)
