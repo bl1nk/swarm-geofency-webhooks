@@ -26,7 +26,7 @@ def hi():
                     params={'venueId': config.get(device, location)})
                 return "OK"
     else:
-        if config.has_option('foursquare', 'access_code'):
+        if config.has_option('foursquare', 'access_token'):
             return ""
         return "<a href=\"%s\">click me</a>" % client.oauth.auth_url()
 
