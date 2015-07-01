@@ -7,26 +7,24 @@ app = Flask(__name__)
 config = configparser.ConfigParser()
 config.read('config.ini')
 
+client = foursquare.Foursquare(
+    client_id=config.get('foursquare', 'client_id'),
+    client_secret=config.get('foursquare', 'client_secret'),
+    redirect_uri=config.get('foursquare', 'redirect_uri'))
+
 
 @app.route('/', methods=['POST', 'GET'])
 def hi():
-    client = foursquare.Foursquare(
-        client_id=config.get('foursquare', 'client_id'),
-        client_secret=config.get('foursquare', 'client_secret'),
-        redirect_uri=config.get('foursquare', 'redirect_uri'))
-
     if request.method == 'POST':
         device = request.form.get('device')
         location = request.form.get('name')
 
         if config.has_section(device):
-            client.set_access_token(
-                client.oauth.get_token(config.get('foursquare', 'access_code')))
+            client.set_access_token(config.get('foursquare', 'access_token'))
             if config.has_option(device, location):
                 client.checkins.add(
                     params={'venueId': config.get(device, location)})
                 return "OK"
-
     else:
         if config.has_option('foursquare', 'access_code'):
             return ""
@@ -35,8 +33,8 @@ def hi():
 
 @app.route('/oauth2/authorize', methods=['GET'])
 def oauth_authorize():
-    code = request.args.get('code')
-    config.set('foursquare', 'access_code', code)
+    config.set('foursquare', 'access_token',
+               client.oauth.get_token(request.args.get('code')))
     with open('config.ini', 'w') as cfg:
         config.write(cfg)
     return "done, set up your webhook now"
